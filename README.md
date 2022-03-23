@@ -14,12 +14,37 @@ In this project I will build a Django to-do list manager ```to_do_list```. This 
 ## Project Overview
 
 - **Step 1**: Set Up Your Virtual Environment and Django
-    ```bash 
-    # create folder
-    $ mkdir projects/todo_list
-    $ cd projects/todo_list
+```bash
+# create folder
+$ mkdir ~/repo/to_do_list
+$ cd ~/repo/to_do_list
 
-    # activate the virtual environment
-    $ python -m venv venv
-    $ source venv/bin/activate
-    ```
+# activate the virtual environment
+$ python -m venv venv
+$ source venv/bin/activate
+```
+
+- **Step 2**: Install and Test Django
+```bash
+python -m pip install django=="3.2.9"
+```
+
+You can use the python interpreter to verify if Django has been installed correctly.
+
+```bash
+$ python                               
+Python 3.9.7
+>>> import django
+>>> django.get_version()
+'3.2.9'
+>>> exit()
+(venv) (base) 
+```
+
+One good idea when you are developing a project is to use ```freeze``` to get the list of packages and versions installed. We use the file text name ```requirements.txt```:
+
+```bash
+python -m pip freeze > requirements.txt
+```
+
+- **Step 3**: Create Your Django To-Do App
