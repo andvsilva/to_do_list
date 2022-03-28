@@ -11,6 +11,44 @@ In this project I will build a Django to-do list manager ```to_do_list```. This 
 - Leverage class-based views to handle the standard database operations
 - Control the Django URL dispatcher by creating URL configurations
 
+## Table of Contents
+
+- [Demo]()
+- [Project Overview]()
+- [Prerequisites]()
+- [Step 1: Set Up Your Virtual Environment and Django]()
+  - [Create a Virtual Environment and a Project Directory]()
+  - [Install and Test Django]()
+- [Step 2: Create Your Django To-Do App]()
+  - [Scaffold the Parent Project]()
+  - [Get Started on Your Django To-Do List App]()
+  - [Configure Your Project]()
+- [Step 3: Design Your To-Do Data]()
+  - [Define Your Data Models]()
+  - [Create the Database]()
+- [Step 4: Add Your Sample To-Do Data]()
+  - [Meet the Django Admin Interface]()
+  - [Start a To-Do List]()
+- [Step 5: Create the Django Views]()
+  - [Code Your First View]()
+  - [Understand Templates]()
+  - [Create a Base Template]()
+  - [Add a Home Page Template]()
+  - [Build a Request Handler]()
+  - [Reuse Class-Based Generic Views]()
+  - [Subclass ListView to Display a List of To-Do Items]()
+  - [Show the Items in a To-Do List]()
+  - [Step 6: Create and Update Model Objects in Django]()
+  - [Lists and Items]()
+  - [New Views]()
+- [Step 7: Delete To-Do Lists and Items]()
+  - [Make DeleteView Subclasses]()
+  - [Define Deletion Confirmations and URLS]()
+  - [Enable Deletions]()
+- [Step 8: Use Your Django To-Do List App]()
+- [Conclusion]()
+- [Next Steps]()
+
 ## Project Overview
 
 - **Step 1**: Set Up Your Virtual Environment and Django
@@ -24,7 +62,7 @@ $ python -m venv venv
 $ source venv/bin/activate
 ```
 
-- **Step 2**: Install and Test Django
+Install and Test Django
 ```bash
 python -m pip install django=="3.2.9"
 ```
@@ -48,12 +86,13 @@ One good idea when you are developing a project is to use ```freeze``` to get th
 python -m pip freeze > requirements.txt
 ```
 
-- **Step 3**: Create Your Django To-Do App
+- **Step 2**: Create Your Django To-Do App
 
 ```bash
 django-admin startproject todo_project .
 ```
-- **Step 4**: Get Started on Your Django To-Do List App
+
+Get Started on Your Django To-Do List App
 
 ```bash
 django-admin startapp todo_app
@@ -129,8 +168,112 @@ Django’s default page provides links to lots of helpful documentation.
 
 You’ve completed all the standard setup tasks for a new Django app. It’s time to start coding the unique features of your application.
 
-- **Step 5**: Design Your To-Do Data
+- **Step 3**: Design Your To-Do Data
 
-**Resources**
+Define Your Data Models. Open the file models.py in your editor and change to the source code below:
+
+```bash
+# todo_app/models.py
+from django.utils import timezone
+
+from django.db import models
+from django.urls import reverse
+
+def one_week_hence():
+    return timezone.now() + timezone.timedelta(days=7)
+
+class ToDoList(models.Model):
+    title = models.CharField(max_length=100, unique=True)
+
+    def get_absolute_url(self):
+        return reverse("list", args=[self.id])
+
+    def __str__(self):
+        return self.title
+
+class ToDoItem(models.Model):
+    title = models.CharField(max_length=100)
+    description = models.TextField(null=True, blank=True)
+    created_date = models.DateTimeField(auto_now_add=True)
+    due_date = models.DateTimeField(default=one_week_hence)
+    todo_list = models.ForeignKey(ToDoList, on_delete=models.CASCADE)
+
+    def get_absolute_url(self):
+        return reverse(
+            "item-update", args=[str(self.todo_list.id), str(self.id)]
+        )
+
+    def __str__(self):
+        return f"{self.title}: due {self.due_date}"
+
+    class Meta:
+        ordering = ["due_date"]
+```
+
+Now save the models.py file with its two model classes. With this file, you’ve just declared the data model for the entire app. Soon, you’ll use Django tooling to map the model to your database.
+
+### Create the Database
+
+So far, you’ve defined the two model classes in your Python code. Now the magic happens! Use the command line to create and activate the [migrations](https://realpython.com/django-migrations-a-primer/):
+
+```bash
+$ python manage.py makemigrations todo_app
+$ python manage.py migrate
+```
+
+![](images/migrations_app.png)
+
+Your data model is now mirrored in the database, and you’ve also created an audit trail in preparation for any structural changes that you may apply later.
+
+- **Step 4**:  Add Your Sample To-Do Data
+
+So now you have a data model and a database, but you don’t yet have any actual data in the form of to-do lists or items. Soon, you’ll be building web pages to create and manipulate these, but for now, you can create a little test data in the easiest way, by using Django’s ready-made admin interface. This tool enables you not only to manage model data, but also to authenticate users, display and handle forms, and validate input.
+
+### Meet the Django Admin Interface
+
+To use the admin interface, you should have a **superuser**. This will be someone with extraordinary powers who can be trusted with the keys to the whole Django server. Does this sound like you? Create your new **superuser** now:
+
+```bash
+$ python manage.py createsuperuser
+Username (leave blank to use): 
+Email address: 
+Password: 
+Password (again): 
+Superuser created successfully.
+```
+
+Just follow the prompts to register yourself as a superuser. Your superpowers are installed!
+
+Although you now have access to the admin interface, there’s one more step to complete before it can make use of your new data models. You need to register the models with the admin app, which you can do by editing the file admin.py:
+
+```bash
+# todo_app/admin.py
+
+from django.contrib import admin
+from todo_app.models import ToDoItem, ToDoList
+
+admin.site.register(ToDoItem)
+admin.site.register(ToDoList)
+```
+
+And now you’re ready to use the Django administration app. Launch the development server and start exploring. First, make sure the development server is running:
+
+```bash
+$ python manage.py runserver
+```
+
+![](images/django_admin_login.png)
+
+Now open a web browser and go to the address http://XXX.X.X.X:XXXX/admin/. You should see the admin app’s login screen. Enter your newly minted credentials, and the admin landing page appears:
+
+![](gifs/django_admin.gif)
+
+Notice that it already displays links for To do lists and To do items. You’re ready to view and change the data.
+
+### Start a To-Do List
+
+
+## Resources
 
 - [Django documentation](https://docs.djangoproject.com/en/4.0/)
+- [Django Migrations: A Primer](https://realpython.com/django-migrations-a-primer/)
